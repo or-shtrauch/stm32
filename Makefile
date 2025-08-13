@@ -90,7 +90,7 @@ flash: $(TARGET_NAME).bin
 
 $(FINAL_TARGET): $(TARGET_NAME).bin
 	$(call log,Linking firmware binary...)
-	$(call command,ln -s $(TARGET_NAME).bin $(FINAL_TARGET))
+	$(call command,ln -sf $(TARGET_NAME).bin $(FINAL_TARGET))
 
 $(TARGET_NAME).bin: $(TARGET_NAME)
 	$(call log,Creating firmware binary...)
