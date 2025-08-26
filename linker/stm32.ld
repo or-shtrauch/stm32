@@ -1,52 +1,43 @@
-/* STM32F411RE Linker Script */
-
 ENTRY(__reset_handler)
 
 MEMORY
 {
-    FLASH(rx)  : ORIGIN = 0x08000000, LENGTH = 512K
-    RAM(rwx)   : ORIGIN = 0x20000000, LENGTH = 128K
+	FLASH(rx):ORIGIN =0x08000000,LENGTH =512K
+	SRAM(rwx):ORIGIN =0x20000000,LENGTH =128K
 }
+
+_estack = ORIGIN(SRAM)+LENGTH(SRAM);
+
+__max_heap_size = 0x200;
+__max_stack_size = 0x400;
 
 SECTIONS
 {
-    .text :
-    {
-        . = ALIGN(4);
-        __start_text = .;
-        *(.isr_vector)
-        *(.text)
-        *(.text.*)
-        *(.rodata)
-        *(.rodata.*)
-        . = ALIGN(4);
-        __end_text = .;
-    } > FLASH
+	.text :
+	{
+	  . = ALIGN(4);
+	  *(.isr_vector_table)
+	  *(.text)
+	  *(.rodata)
+	  . = ALIGN(4);
+	  _etext = .;
+	}>FLASH
 
-    .data :
-    {
-        . = ALIGN(4);
-        __start_data = .;
-        *(.data)
-        *(.data.*)
-        . = ALIGN(4);
-        __end_data = .;
-    } > RAM AT > FLASH
+	.data :
+	{
+	  . = ALIGN(4);
+	  _sdata = .;
+	  *(.data)
+	  . = ALIGN(4);
+	  _edata = .;
+	} > SRAM AT> FLASH
 
-    .bss :
-    {
-        . = ALIGN(4);
-        __start_bss = .;
-        *(.bss)
-        *(.bss.*)
-        *(COMMON)
-        . = ALIGN(4);
-        __end_bss = .;
-    } > RAM
-
-    .stack_top :
-    {
-        . = ALIGN(8);
-        __stack_top = .;
-    } > RAM
+	.bss :
+	{
+	  . = ALIGN(4);
+	  _sbss = .;
+	  *(.bss)
+	  . = ALIGN(4);
+	  _ebss = .;
+	}> SRAM
 }

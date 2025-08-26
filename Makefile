@@ -1,7 +1,6 @@
 include log.mk
 
-PROJECT_NAME    := stm_fw
-PROJECT_VERSION ?= $(shell cat version)
+PROJECT_NAME := stm_fw
 
 CROSS_COMPILE ?= arm-none-eabi-
 CC            := $(shell which $(CROSS_COMPILE)gcc)
@@ -16,11 +15,7 @@ ST_FLASH ?= $(strip $(shell which st-flash))
 CC_VERSION ?= $(shell $(CC) -dumpversion)
 
 ifeq ($(CC),)
-    $(call error,missing ARM compiler $(CROSS_COMPILE)gcc)
-endif
-
-ifneq ($(CCACHE),)
-    CC := $(CCACHE) $(CC)
+	$(call error,missing ARM compiler $(CROSS_COMPILE)gcc)
 endif
 
 ifeq ($(V),1)
@@ -38,6 +33,7 @@ BUILD_DIR   ?= build
 OBJ_DIR     ?= $(BUILD_DIR)/obj
 TARGET_NAME ?= $(BUILD_DIR)/$(PROJECT_NAME)_$(PROJECT_VERSION)
 
+ELF_TARGET   := $(TARGET_NAME).elf
 FINAL_TARGET := $(PROJECT_NAME).bin
 
 SRC_FILES ?= $(wildcard $(SRC_DIR)/*.c)
@@ -46,26 +42,24 @@ LD_SCRIPT ?= linker/stm32.ld
 C_SRCS ?= $(filter %.c, $(SRC_FILES))
 C_OBJS ?= $(patsubst %.c, $(OBJ_DIR)/%.o, $(C_SRCS))
 
-CFLAGS ?= -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16
-CFLAGS += -g -Os -Wall -Wextra -Werror -Wno-unused-parameter
-CFLAGS += -MD -MP -std=c99 -fdiagnostics-color
+OPT_LVL ?= 0
+CFLAGS  ?= -c -mcpu=cortex-m4 -mthumb -std=gnu11 -fdiagnostics-color
+CFLAGS  += -g -O$(OPT_LVL) -Wall -Wextra -Werror -Wno-unused-parameter
 
-LDFLAGS      ?= -T$(LD_SCRIPT) -nostdlib -Wl,--gc-sections
+LDFLAGS      ?= -nostdlib -T$(LD_SCRIPT)
 INCLUDE_DIRS ?= -I./include
 
 FLASH_MEM_ADDR ?= 0x08000000
 
+.PHONY = all flash setup_dir
 .DEFAULT_GOAL ?= all
 
-all: print-info $(FINAL_TARGET)
+all: print-info $(FINAL_TARGET) flash setup_dir
 	$(call print,Build successful.)
-
-.PHONY: flash print-info setup_dir
 
 print-info:
 	@printf "$(B_CYAN)####################################################################$(RESET)\n"
 	$(call print-var,PROJECT_NAME,$(PROJECT_NAME))
-	$(call print-var,PROJECT_VERSION,$(PROJECT_VERSION))
 	$(call print-var,TARGET,$(TARGET_NAME).bin)
 	$(call print-var,CC_VERSION,$(CC_VERSION))
 	$(call print-var,CC,$(CC))
@@ -79,35 +73,25 @@ print-info:
 	$(call print-var,CFLAGS,$(CFLAGS))
 	@printf "$(B_CYAN)####################################################################$(RESET)\n"
 
-flash: $(TARGET_NAME).bin
-	ifeq ($(ST_FLASH),)
-		$(call error,missing stlink)
-	endif
-
-	$(call log,Flashing $(PROJECT_NAME)...)
-	$(call command,$(ST_FLASH) --reset write $< $(FLASH_MEM_ADDR))
-	$(call log,Flash successful.)
-
-$(FINAL_TARGET): $(TARGET_NAME).bin
-	$(call log,Linking firmware binary...)
-	$(call command,ln -sf $(TARGET_NAME).bin $(FINAL_TARGET))
-
-$(TARGET_NAME).bin: $(TARGET_NAME)
-	$(call log,Creating firmware binary...)
-	$(call command,$(OBJCOPY) -O binary $< $@)
-
-$(TARGET_NAME): $(C_OBJS)
-	$(call log,Compiling and linking...)
-	$(call command,$(CC) $(CFLAGS) $(INCLUDE_DIRS) $(LDFLAGS) -o $@ $^)
 
 $(OBJ_DIR)/%.o: %.c setup_dir
 	$(call log, Compiling: $<)
-	$(call command,$(CC) $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@)
+	$(call command,$(CC) $(CFLAGS) $(INCLUDE_DIRS) $< -o $@)
+
+$(ELF_TARGET) : $(C_OBJS)
+	$(call command,$(CC) $(LDFLAGS) $(INCLUDE_DIRS) -o $@ $^)
+
+$(FINAL_TARGET): $(ELF_TARGET)
+	$(call command,$(OBJCOPY) -O binary $(ELF_TARGET) $(FINAL_TARGET))
 
 setup_dir:
 	$(call log,Creating build directory...)
 	$(call command,mkdir -p $(OBJ_DIR)/src)
 
+flash: $(FINAL_TARGET)
+	$(call log,Flashing $(PROJECT_NAME)...)
+	$(call command,sudo $(ST_FLASH) --reset write $< $(FLASH_MEM_ADDR))
+	$(call log,Flash successful.)
 
 .PHONY: clean
 clean:

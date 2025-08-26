@@ -1,48 +1,47 @@
+#include <stdint.h>
+
 #include "STM32.h"
 
-#define ISR_VECTOR __attribute__((section(".isr_vector")))
+extern uint32_t _estack;
+extern uint32_t _etext;
+extern uint32_t _sdata;
+extern uint32_t _edata;
+extern uint32_t _sbss;
+extern uint32_t _ebss;
 
-extern int main(void);
-NAKED void __reset_handler(void);
+void __reset_handler(void);
+int  main(void);
 
-/* Symbols defined in the linker script */
-extern uint32_t __end_text;
-extern uint32_t __start_data;
-extern uint32_t __end_data;
-extern uint32_t __start_bss;
-extern uint32_t __end_bss;
-extern uint32_t __stack_top;
+ISR_VECTOR uint32_t vector_tbl[] = {
 
-/* Interrupt vector table */
-ISR_VECTOR isr_handler_t vector_table[] = {
-    [E_STACK_TOP]             = (void *)&__stack_top, /* The stack pointer */
-    [E_RESET_HANDLER]         = __reset_handler,      /* The reset handler */
-    [E_NMI_HANDLER]           = NULL,                 /* NMI handler */
-    [E_HARD_FAULT_HANDLER]    = NULL,                 /* Hard fault handler */
-    [E_MEM_MANAGE_HANDLER]    = NULL, /* MemManage fault handler */
-    [E_BUS_FAULT_HANDLER]     = NULL, /* BusFault handler */
-    [E_USAGE_FAULT_HANDLER]   = NULL, /* UsageFault handler */
-    [E_RESERVED1]             = NULL, /* Reserved */
-    [E_RESERVED2]             = NULL, /* Reserved */
-    [E_RESERVED3]             = NULL, /* Reserved */
-    [E_RESERVED4]             = NULL, /* Reserved */
-    [E_SVCALL_HANDLER]        = NULL, /* SVCall handler */
-    [E_DEBUG_MONITOR_HANDLER] = NULL, /* Debug monitor handler */
-    [E_RESERVED5]             = NULL, /* Reserved */
-    [E_PEND_SV_HANDLER]       = NULL, /* PendSV handler */
-    [E_SYSTICK_HANDLER]       = NULL, /* SysTick handler */
+    [E_STACK_TOP]             = (uint32_t)&_estack,
+    [E_RESET_HANDLER]         = (uint32_t)&__reset_handler,
+    [E_NMI_HANDLER]           = 0,
+    [E_HARD_FAULT_HANDLER]    = 0,
+    [E_MEM_MANAGE_HANDLER]    = 0,
+    [E_BUS_FAULT_HANDLER]     = 0,
+    [E_USAGE_FAULT_HANDLER]   = 0,
+    [E_RESERVED1]             = 0,
+    [E_RESERVED2]             = 0,
+    [E_RESERVED3]             = 0,
+    [E_RESERVED4]             = 0,
+    [E_SVCALL_HANDLER]        = 0,
+    [E_DEBUG_MONITOR_HANDLER] = 0,
+    [E_RESERVED5]             = 0,
+    [E_PEND_SV_HANDLER]       = 0,
+    [E_SYSTICK_HANDLER]       = 0,
 };
 
 void __reset_handler(void)
 {
-    size_t data_size = (size_t)&__end_data - (size_t)&__start_data;
-    size_t bss_size  = (size_t)&__end_bss - (size_t)&__start_bss;
+    uint32_t data_mem_size = (uint32_t)&_edata - (uint32_t)&_sdata;
+    uint32_t bss_mem_size  = (uint32_t)&_ebss - (uint32_t)&_sbss;
 
-    memcpy(U8_ADDR(__start_data), U8_ADDR(__end_text), data_size);
-    memset(U8_ADDR(__start_bss), 0, bss_size);
+    memcpy((uint8_t *)&_sdata, (uint8_t *)&_etext, data_mem_size);
+    memset((uint8_t *)&_sbss, 0, bss_mem_size);
 
     main();
 
-    while (1) {
+    while (true) {
     }
 }
