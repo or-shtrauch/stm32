@@ -34,6 +34,14 @@ enum isr_type
     E_SYSTICK_HANDLER,
 };
 
+enum GPIO_MODE
+{
+    E_GPIO_MODE_INPUT  = 0b00,
+    E_GPIO_MODE_OUTPUT = 0b01,
+    E_GPIO_MODE_ALT    = 0b10,
+    E_GPIO_MODE_ANALOG = 0b11,
+};
+
 struct RCC
 {
     volatile uint8_t  __padding[0x30UL];

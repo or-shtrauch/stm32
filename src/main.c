@@ -1,18 +1,14 @@
 #include "STM32.h"
 
-#define GPIOAEN (1U << 0)
-#define PIN5    (1U << 5)
-#define LED_PIN PIN5
+#define LED_PIN    5
+#define BUTTON_PIN 13
 
 int main(void)
 {
-    RCC->AHB1ENR |= GPIOAEN;
-
-    GPIOA->MODER |= (1U << 10);
-    GPIOA->MODER &= ~(1U << 11);
+    gpio_pin_init(GPIO_A, LED_PIN, E_GPIO_MODE_OUTPUT);
+    gpio_pin_init(GPIO_C, BUTTON_PIN, E_GPIO_MODE_INPUT);
 
     while (true) {
-        GPIOA->ODR ^= LED_PIN;
-        delay(900000);
+        gpio_pin_set(GPIO_A, LED_PIN, gpio_pin_get(GPIO_C, BUTTON_PIN));
     }
 }
