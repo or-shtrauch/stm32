@@ -3,7 +3,11 @@
 
 #include "types.h"
 #include "gpio.h"
+#include "sys_tick.h"
 
+#define FREQ 16000000UL
+
+#define SYSTICK_BASE      (0xE000E010UL)
 #define PERIPH_BASE       (0x40000000UL)
 #define AHB1PERIPH_OFFSET (0x00020000UL)
 #define GPIOA_OFFSET      (0x0000UL)
@@ -15,10 +19,12 @@
 #define GPIO_BASE       (AHB1PERIPH_BASE)
 #define RCC_BASE        (AHB1PERIPH_BASE + RCC_OFFSET)
 
-#define RCC   ((struct RCC *)(RCC_BASE))
+#define RCC    ((struct RCC *)(RCC_BASE))
 #define GPIO_A ((struct GPIO *)(GPIO_BASE + GPIOA_OFFSET))
 #define GPIO_B ((struct GPIO *)(GPIO_BASE + GPIOB_OFFSET))
 #define GPIO_C ((struct GPIO *)(GPIO_BASE + GPIOC_OFFSET))
+
+#define SYSTICK ((struct SYS_TICK *)(SYSTICK_BASE))
 
 #define delay(t)                                                               \
     do {                                                                       \

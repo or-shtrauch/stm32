@@ -62,6 +62,14 @@ struct GPIO
     volatile uint32_t AFRH;    /*offset: 0x24      */
 };
 
+struct SYS_TICK
+{
+    volatile uint32_t CTRL;  /*offset: 0x00 */
+    volatile uint32_t LOAD;  /*offset: 0x04 */
+    volatile uint32_t VAL;   /*offset: 0x08 */
+    volatile uint32_t CALIB; /*offset: 0x0C */
+};
+
 #define memset _memset
 #define memcpy _memcpy
 

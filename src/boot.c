@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stddef.h>
 
 #include "STM32.h"
 
@@ -16,20 +17,20 @@ ISR_VECTOR uint32_t vector_tbl[] = {
 
     [E_STACK_TOP]             = (uint32_t)&_estack,
     [E_RESET_HANDLER]         = (uint32_t)&__reset_handler,
-    [E_NMI_HANDLER]           = 0,
-    [E_HARD_FAULT_HANDLER]    = 0,
-    [E_MEM_MANAGE_HANDLER]    = 0,
-    [E_BUS_FAULT_HANDLER]     = 0,
-    [E_USAGE_FAULT_HANDLER]   = 0,
-    [E_RESERVED1]             = 0,
-    [E_RESERVED2]             = 0,
-    [E_RESERVED3]             = 0,
-    [E_RESERVED4]             = 0,
-    [E_SVCALL_HANDLER]        = 0,
-    [E_DEBUG_MONITOR_HANDLER] = 0,
-    [E_RESERVED5]             = 0,
-    [E_PEND_SV_HANDLER]       = 0,
-    [E_SYSTICK_HANDLER]       = 0,
+    [E_NMI_HANDLER]           = (uint32_t)NULL,
+    [E_HARD_FAULT_HANDLER]    = (uint32_t)NULL,
+    [E_MEM_MANAGE_HANDLER]    = (uint32_t)NULL,
+    [E_BUS_FAULT_HANDLER]     = (uint32_t)NULL,
+    [E_USAGE_FAULT_HANDLER]   = (uint32_t)NULL,
+    [E_RESERVED1]             = (uint32_t)NULL,
+    [E_RESERVED2]             = (uint32_t)NULL,
+    [E_RESERVED3]             = (uint32_t)NULL,
+    [E_RESERVED4]             = (uint32_t)NULL,
+    [E_SVCALL_HANDLER]        = (uint32_t)NULL,
+    [E_DEBUG_MONITOR_HANDLER] = (uint32_t)NULL,
+    [E_RESERVED5]             = (uint32_t)NULL,
+    [E_PEND_SV_HANDLER]       = (uint32_t)NULL,
+    [E_SYSTICK_HANDLER]       = (uint32_t)NULL,
 };
 
 void __reset_handler(void)

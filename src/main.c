@@ -6,9 +6,9 @@
 int main(void)
 {
     gpio_pin_init(GPIO_A, LED_PIN, E_GPIO_MODE_OUTPUT);
-    gpio_pin_init(GPIO_C, BUTTON_PIN, E_GPIO_MODE_INPUT);
 
     while (true) {
-        gpio_pin_set(GPIO_A, LED_PIN, gpio_pin_get(GPIO_C, BUTTON_PIN));
+        sys_tick_delay_sync(SYSTICK, 500);
+        gpio_pin_toggle(GPIO_A, LED_PIN);
     }
 }

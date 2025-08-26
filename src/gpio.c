@@ -43,3 +43,8 @@ bool gpio_pin_get(struct GPIO *gpio_port, uint8_t pin_no)
 {
     return !(gpio_port->IDR & (1U << pin_no));
 }
+
+void gpio_pin_toggle(struct GPIO *gpio_port, uint8_t pin_no)
+{
+    gpio_port->ODR ^= (1U << pin_no);
+}
